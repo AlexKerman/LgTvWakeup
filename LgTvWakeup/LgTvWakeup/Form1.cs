@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Globalization;
 using System.IO.Ports;
 using System.Runtime.InteropServices;
@@ -17,24 +18,44 @@ namespace LgTvWakeup
 		public Form1()
 		{
 			InitializeComponent();
+			notifyIcon1.Icon = Icon;
 			PowerManager.IsMonitorOnChanged += MonitorOnChanged;
 
-			notifyIcon1.Icon = Icon = Properties.Resources.MonPower;
+			var settingsPort = Properties.Settings.Default["PortName"].ToString();
+			
 			foreach (var portName in SerialPort.GetPortNames())
 			{
 				comboBox1.Items.Add(portName);
+				if (portName == settingsPort)
+					comboBox1.SelectedItem = portName;
 			}
 		}
+
+		private string PortName => comboBox1.Text;
 
 		private void MonitorOnChanged(object sender, EventArgs e)
 		{
 			bool monOn = PowerManager.IsMonitorOn;
-			using (var port = new SerialPort(comboBox1.Text, 9600, Parity.None, 8, StopBits.One))
+			SendMessage("ka 01 " + (monOn ? "01" : "00"));
+		}
+
+		private void SendMessage(string message)
+		{
+			if (PortName == "") return;
+			try
 			{
-				port.Handshake = Handshake.XOnXOff;
-				port.Open();
-				port.WriteLine("ka 01 " + (monOn ? "01" : "00"));
-				port.Close();
+				using (var port = new SerialPort(PortName, 9600, Parity.None, 8, StopBits.One))
+				{
+					port.Handshake = Handshake.XOnXOff;
+					port.Open();
+					port.WriteLine(message);
+					port.Close();
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
 			}
 		}
 
@@ -86,6 +107,25 @@ namespace LgTvWakeup
 		private void OnExit(object sender, EventArgs e)
 		{
 			Close();
+		}
+
+		private void OnSoundOn(object sender, EventArgs e)
+		{
+			SendMessage("ke 00 01");
+		}
+
+		private void OnSoundOff(object sender, EventArgs e)
+		{
+			SendMessage("ke 00 00");
+		}
+
+		private void comboBox1_SelectionChangeCommitted(object sender, EventArgs e)
+		{
+			if (PortName != "")
+			{
+				Properties.Settings.Default["PortName"] = PortName;
+				Properties.Settings.Default.Save();
+			}
 		}
 	}
 }

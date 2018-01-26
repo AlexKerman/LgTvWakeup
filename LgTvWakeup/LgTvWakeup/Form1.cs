@@ -12,8 +12,8 @@ namespace LgTvWakeup
 {
 	public partial class Form1 : Form
 	{
-
 		private SerialPort port;
+		private const string AppRegistryName = "LgTvWakeup";
 
 		public Form1()
 		{
@@ -29,6 +29,8 @@ namespace LgTvWakeup
 				if (portName == settingsPort)
 					comboBox1.SelectedItem = portName;
 			}
+
+			checkBox1.Checked = AutostartRegistryValue;
 		}
 
 		private string PortName => comboBox1.Text;
@@ -56,6 +58,28 @@ namespace LgTvWakeup
 			{
 				Console.WriteLine(e);
 				throw;
+			}
+		}
+
+		private bool AutostartRegistryValue
+		{
+			get
+			{
+				RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+				var v = key.GetValue(AppRegistryName);
+				return v != null;
+			}
+			set
+			{
+				RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+				if (value)
+				{
+					key.SetValue(AppRegistryName, Application.ExecutablePath);
+				}
+				else
+				{
+					key.DeleteValue(AppRegistryName, false);
+				}
 			}
 		}
 
@@ -126,6 +150,11 @@ namespace LgTvWakeup
 				Properties.Settings.Default["PortName"] = PortName;
 				Properties.Settings.Default.Save();
 			}
+		}
+
+		private void checkBox1_CheckedChanged(object sender, EventArgs e)
+		{
+			AutostartRegistryValue = checkBox1.Checked;
 		}
 	}
 }

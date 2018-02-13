@@ -34,5 +34,17 @@ namespace LgTvWakeup.Properties {
                 this["PortName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool HideOnStart {
+            get {
+                return ((bool)(this["HideOnStart"]));
+            }
+            set {
+                this["HideOnStart"] = value;
+            }
+        }
     }
 }

@@ -31,6 +31,8 @@ namespace LgTvWakeup
 			}
 
 			checkBox1.Checked = AutostartRegistryValue;
+			checkBox2.Checked = (bool)Properties.Settings.Default["HideOnStart"];
+			if (checkBox2.Checked) WindowState = FormWindowState.Minimized;
 		}
 
 		private string PortName => comboBox1.Text;
@@ -155,6 +157,11 @@ namespace LgTvWakeup
 		private void checkBox1_CheckedChanged(object sender, EventArgs e)
 		{
 			AutostartRegistryValue = checkBox1.Checked;
+		}
+
+		private void checkBox2_CheckedChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["HideOnStart"] = checkBox2.Checked;
 		}
 	}
 }

@@ -27,7 +27,10 @@ namespace LgTvWakeup
 			{
 				comboBox1.Items.Add(portName);
 				if (portName == settingsPort)
+				{
 					comboBox1.SelectedItem = portName;
+					SendMessage("ka 01 01");
+				}
 			}
 
 			checkBox1.Checked = AutostartRegistryValue;
